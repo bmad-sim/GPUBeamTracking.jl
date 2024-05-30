@@ -1,0 +1,13 @@
+name = "BeamTracking"
+uuid = "8ef5c10a-4ca3-437f-8af5-b84d8af36df0"
+authors = ["mattsignorelli <mgs255@cornell.edu> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
