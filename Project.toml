@@ -9,7 +9,7 @@ GTPSA = "b27dd330-f138-47c5-815b-40db9dd9b6e8"
 SimUtils = "042f21a8-4046-4c2b-b9ed-b6e14110b343"
 
 [compat]
-julia = "1.6.7"
+julia = "1.9"
 GTPSA = "0.6.1"
 
 [extras]
