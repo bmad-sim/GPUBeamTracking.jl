@@ -4,7 +4,6 @@ authors = ["mattsignorelli <mgs255@cornell.edu> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
-AcceleratorLattice = "118f53b2-f4ec-480a-a460-1a04f660b17d"
 GTPSA = "b27dd330-f138-47c5-815b-40db9dd9b6e8"
 
 [compat]
