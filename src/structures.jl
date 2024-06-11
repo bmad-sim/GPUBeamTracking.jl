@@ -1,13 +1,16 @@
 # structures
 
 mutable struct Particle
-    p0c
+    """Particle structure"""
     s
+    p0c
     mc2
-    r
+    r::Vector
 end
 
+
 struct Drift
+    """Drift Structure"""
     L
 end
     
