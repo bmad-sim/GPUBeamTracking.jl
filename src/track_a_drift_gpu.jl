@@ -21,22 +21,28 @@ function track_a_drift_GPU!(p_in, drift, inter)
     mc2 = p_in.mc2
 
     x, px, y, py, z, pz = p_in.x, p_in.px, p_in.y, p_in.py, p_in.z, p_in.pz
-    P, Px, Py, Pxy2, Pl, dz = inter.P, inter.Px, inter.Py, inter.Pxy2, inter.Pl
+    P, Px, Py, Pxy2, Pl, dz = inter.P, inter.Px, inter.Py, inter.Pxy2, inter.Pl, inter.dz
 
-    P = 1 .+ pz            # Particle's total momentum over p0
-    Px = px ./ P           # Particle's 'x' momentum over p0
-    Py = py ./ P           # Particle's 'y' momentum over p0
-    Pxy2 = Px.^2 + Py.^2  # Particle's transverse mometum^2 over p0^2
-    Pl = sqrt.(1 .- Pxy2)     # Particle's longitudinal momentum over p0
-    x .+= L .* Px ./ Pl
-    y .+= L .* Py ./ Pl
-    
-    # z = z + L * ( beta/beta_ref - 1.0/Pl ) but numerically accurate:
-    dz = L .* (sqrt_one.((mc2.^2 .* (2 .*pz.+pz.^2))./((p0c.*P).^2 .+ mc2.^2))
-                .+ sqrt_one.(-Pxy2)./Pl)
-    
-    z .+= dz
-    s .+= L
+    index = threadIdx().x
+    stride = blockDim().x
+
+    for i=index:stride:eachindex(x)
+        P[i] = 1 + pz[i]            # Particle's total momentum over p0
+        Px[i] = px[i] / P[i]          # Particle's 'x' momentum over p0
+        Py[i] = py[i] / P[i]          # Particle's 'y' momentum over p0
+        Pxy2[i] = Px[i]^2 + Py[i]^2  # Particle's transverse mometum^2 over p0^2
+        Pl[i] = sqrt(1 - Pxy2[i])     # Particle's longitudinal momentum over p0
+        x[i] += L[i] * Px[i] / Pl[i]
+        y[i] += L[i] * Py[i] / Pl[i]
+        
+        # z = z + L * ( beta/beta_ref - 1.0/Pl ) but numerically accurate:
+        dz[i] = L[i] * (sqrt_one[i]((mc2[i]^2 * (2 *pz[i]+pz[i]^2))/((p0c[i]*P[i])^2 + mc2[i]^2))
+                    + sqrt_one(-Pxy2[i])/Pl[i])
+        
+        z[i] += dz[i]
+        s[i] += L[i]
+    end
+
     particle = p_in
     
     return 
@@ -68,6 +74,8 @@ L = CUDA.fill(0.005, 1000);
 drift = GPU_Drift(L)
 inter = Intermediate(P, Px, Py, Pxy2, Pl, dz)
 p_in = GPU_Particle(x, px, y, py, z, pz, s, p0c, mc2)
+
+@cuda threads = 1000 track_a_drift_GPU!(p_in, drift, inter)
 
 """benchmarking"""
 function bench_track_a_drift(p_in, drift, inter)
