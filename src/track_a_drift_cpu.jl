@@ -1,4 +1,4 @@
-using CUDA, BenchmarkTools, Test, Adapt
+using CUDA, BenchmarkTools
 include("low_level/sqrt_one.jl")
 include("low_level/structures.jl")
 
@@ -37,7 +37,7 @@ function track_a_drift(p_in, drift)
 end
     
 
-
+"""test input"""
 x = fill(1.0, 1024)
 y = fill(1.0, 1024)
 z = fill(0.75, 1024)
@@ -54,4 +54,5 @@ drift = Drift(L)
 
 p_in = Particle(x, px, y, py, z, pz, s, p0c, mc2)
 
-track_a_drift(p_in, drift)
+track_a_drift(p_in, drift)  # consistent output with python code
+@btime track_a_drift(p_in, drift)  # first test: 97.650 μs; second test: 100.063 μs
