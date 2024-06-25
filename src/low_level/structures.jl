@@ -1,9 +1,7 @@
-using CUDA
-"""Structures used for particle tracking"""
+"""Structures used for particle tracking on GPU;
+adapt type with Adapt.@adapt_structure in main program"""
 
 struct GPU_Particle{K}
-    """Particle struct on GPU; adapt type
-    with Adapt.@adapt_structure in main program"""
     x::K
     px::K
     y::K
@@ -17,6 +15,7 @@ struct GPU_Particle{K}
 end
 
 struct Intermediate{K}
+    """Intermediate helper struct"""
     P::K
     Px::K
     Py::K
@@ -26,22 +25,6 @@ struct Intermediate{K}
 end
 
 struct GPU_Drift{K}
-    """Drift structure on GPU"""
     L::K
 end
 
-struct Drift{T}
-    L::T
-end
-
-struct Particle{T}
-    x::T
-    px::T
-    y::T
-    py::T
-    z::T
-    pz::T
-    s::T
-    p0c::T
-    mc2::T
-end
