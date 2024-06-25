@@ -22,12 +22,7 @@ struct Intermediate{K}
     Py::K
     Pxy2::K
     Pl::K
-    X::K
-    Y::K
     dz::K
-    dz1::K
-    dz2::K
-    dz3::K
 end
 
 struct GPU_Drift{K}
