@@ -14,6 +14,19 @@ struct GPU_Particle{K}
 
 end
 
+struct Particle{T}
+    x::T
+    px::T
+    y::T
+    py::T
+    z::T
+    pz::T
+    s::T
+    p0c::T
+    mc2::T
+
+end
+
 struct Intermediate{K}
     """Intermediate helper struct"""
     P::K
@@ -22,9 +35,14 @@ struct Intermediate{K}
     Pxy2::K
     Pl::K
     dz::K
+
 end
 
 struct GPU_Drift{K}
     L::K
+end
+
+struct Drift{T}
+    L::T
 end
 
