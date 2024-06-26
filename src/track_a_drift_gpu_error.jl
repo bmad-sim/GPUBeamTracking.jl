@@ -25,7 +25,7 @@ See Bmad manual section 24.9
     Pxy2 .= Px.^2 .+ Py.^2;
     Pl .= sqrt.(1 .- Pxy2);
 
-    x .= L .* Px # no error
+    x .+= L .* Px  # returns the call to print string error when the function is called
 
 
 
