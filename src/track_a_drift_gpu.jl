@@ -19,37 +19,41 @@ See Bmad manual section 24.9
     x, px, y, py, z, pz = p_in.x, p_in.px, p_in.y, p_in.py, p_in.z, p_in.pz
     P, Px, Py, Pxy2, Pl, dz = inter.P, inter.Px, inter.Py, inter.Pxy2, inter.Pl, inter.dz
 
-    P .= pz .+ 1;
-    Px .= px ./ P;
-    Py .= py ./ P;
-    Pxy2 .= Px.^2 .+ Py.^2;
-    Pl .= sqrt.(1 .- Pxy2);
-
-    x .= L .* Px # no error
-
-
-
-  
+    index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
+    stride = gridDim().x * blockDim().x
     
-    z .+= dz;
-    s .+= L;
+    i = index
+    while i <= length(x)
 
+        @inbounds (P[i] = pz[i] + 1;
+        Px[i] = px[i] / P[i];
+        Py[i] = py[i] / P[i];
+        Pxy2[i] = Px[i]^2 + Py[i]^2;
+        Pl[i] = sqrt(1 - Pxy2[i]);)
+
+        @inbounds (x[i] += L[i] * Px[i] / Pl[i]; 
+        y[i] += L[i] * Py[i] / Pl[i];)
+
+        # z = z + L * ( beta/beta_ref - 1.0/Pl ) but numerically accurate:
+        @inbounds (dz[i] = L[i] * (sqrt_one((mc2[i]^2 * (2 *pz[i]+pz[i]^2))/((p0c[i]*P[i])^2 + mc2[i]^2))
+        + sqrt_one(-Pxy2[i])/Pl[i]);)
+        
+        @inbounds (z[i] += dz[i];
+        s[i] += L[i];)
+
+        i += stride;
+    end
     return
 end
 
-P = CUDA.fill(0.0, 10000); Px = CUDA.fill(0.0, 10000); Py = CUDA.fill(0.0, 10000);
-Pxy2 = CUDA.fill(0.0, 10000); Pl = CUDA.fill(0.0, 10000); dz = CUDA.fill(0.0, 10000);
+"""configuring number of threads and blocks"""
+function bench_gpu!(p_in, drift, inter)
+    kernel = @cuda launch=false track_a_drift_gpu!(p_in, drift, inter)
+    config = launch_configuration(kernel.fun)
+    threads = min(length(x), config.threads)
+    blocks = cld(length(x), threads)
 
-"""sample input of 1000 particles"""
-x = CUDA.fill(1.0, 10000); y = CUDA.fill(1.0, 10000); z = CUDA.fill(0.75, 10000);
-px = CUDA.fill(0.5, 10000); py = CUDA.fill(0.2, 10000); pz = CUDA.fill(0.5, 10000);
-s = CUDA.fill(1.0, 10000); p0c = CUDA.fill(1.0, 10000); mc2 = CUDA.fill(.511, 10000);
-
-L = CUDA.fill(0.005, 10000);
-
-drift = GPU_Drift(L);
-inter = Intermediate(P, Px, Py, Pxy2, Pl, dz);
-p_in = GPU_Particle(x, px, y, py, z, pz, s, p0c, mc2);
-
-
-@cuda track_a_drift_gpu!(p_in, drift, inter)
+    CUDA.@sync begin
+        kernel(p_in, drift, inter; threads, blocks)
+    end
+end
