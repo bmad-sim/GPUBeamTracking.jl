@@ -41,10 +41,8 @@ drift elements. See Bmad manual section 24.9
         s[i] += L[i];)
 
         i += stride;
-    end
-    
+    end   
     return
-
 end
 
 
