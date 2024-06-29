@@ -27,7 +27,7 @@ struct Particle{T}
 
 end
 
-struct Intermediate{K}
+struct Intermediate_Drift{K}
     """Intermediate helper struct"""
     P::K
     Px::K
@@ -42,7 +42,16 @@ struct GPU_Drift{K}
     L::K
 end
 
-struct Drift{T}
-    L::T
+struct Intermediate_Offset{K}
+    x_ele_int::K
+    y_ele_int::K
+    x_ele::K
+    y_ele::K
+    px_ele::K
+    py_ele::K
+    s::K
+    c::K
 end
+
+
 
