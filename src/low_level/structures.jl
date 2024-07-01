@@ -1,4 +1,4 @@
-"""Structures used for particle tracking on GPU;
+ """Structures used for particle tracking on GPU;
 adapt type with Adapt.@adapt_structure in main program"""
 
 struct GPU_Particle{K}
@@ -52,6 +52,13 @@ struct Intermediate_Offset{K}
     s::K
     c::K
 end
+
+struct offset_and_tilt{K}
+    x_offset::K
+    y_offset::K
+    tilt::K
+end
+
 
 
 
