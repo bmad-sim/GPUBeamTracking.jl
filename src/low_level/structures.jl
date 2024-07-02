@@ -37,7 +37,7 @@ struct Intermediate_Drift{T}
     dz::T
 end
 
-struct Intermediate_Offset{T}
+struct Intermediate_Set{T}
     x_ele::T
     y_ele::T
     px_ele::T
@@ -46,5 +46,11 @@ struct Intermediate_Offset{T}
     c::T
 end
 
-
-
+struct Intermediate_Unset{T}
+    x_lab::T
+    y_lab::T
+    px_lab::T
+    py_lab::T
+    s::T
+    c::T
+end
