@@ -1,19 +1,6 @@
  """Structures used for particle tracking on GPU;
 adapt type with Adapt.@adapt_structure in main program"""
 
-struct GPU_Particle{K}
-    x::K
-    px::K
-    y::K
-    py::K
-    z::K
-    pz::K
-    s::K
-    p0c::K
-    mc2::K
-
-end
-
 struct Particle{T}
     x::T
     px::T
@@ -27,38 +14,37 @@ struct Particle{T}
 
 end
 
-struct Intermediate_Drift{K}
-    """Intermediate helper struct"""
-    P::K
-    Px::K
-    Py::K
-    Pxy2::K
-    Pl::K
-    dz::K
-
+struct Drift{T}
+    L::T
 end
 
-struct GPU_Drift{K}
-    L::K
+struct offset_and_tilt{T}
+    x_offset::T
+    y_offset::T
+    tilt::T
 end
 
-struct Intermediate_Offset{K}
-    x_ele_int::K
-    y_ele_int::K
-    x_ele::K
-    y_ele::K
-    px_ele::K
-    py_ele::K
-    s::K
-    c::K
+"""Intermediate structs in order 
+to not dynamically allocate memory to
+intermediate calculations"""
+
+struct Intermediate_Drift{T}
+    P::T
+    Px::T
+    Py::T
+    Pxy2::T
+    Pl::T
+    dz::T
 end
 
-struct offset_and_tilt{K}
-    x_offset::K
-    y_offset::K
-    tilt::K
+struct Intermediate_Offset{T}
+    x_ele::T
+    y_ele::T
+    px_ele::T
+    py_ele::T
+    s::T
+    c::T
 end
-
 
 
 
