@@ -27,9 +27,9 @@ function low_energy_z_correction(z_calc, int)
         dz[i] = (ds[i] * pz[i] * (1 - 3*(pz[i]*beta0[i]^2)/2+pz[i]^2*beta0[i]^2
                 * (2*beta0[i]^2-(mass[i]/e_tot[i])^2/2) )
                 * (mass[i]/e_tot[i])^2
-                * (evaluation[i]<3e-7) 
+                * (evaluation[i]<3e-7*e_tot) 
                 + (ds[i]*(beta[i]-beta0[i])/beta0[i])
-                * (evaluation[i]>=3e-7) )
+                * (evaluation[i]>=3e-7*e_tot) )
            
         i += stride
     end

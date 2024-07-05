@@ -1,7 +1,7 @@
  """Structures used for particle tracking on GPU;
 adapt type with Adapt.@adapt_structure in main program"""
 
-struct Particle{T}
+struct Particle{T} # used in several scripts
     x::T
     px::T
     y::T
@@ -14,28 +14,35 @@ struct Particle{T}
 
 end
 
-struct Drift{T}
+struct Drift{T} # track a drift
     L::T
 end
 
-struct offset_and_tilt{T}
+struct offset_and_tilt{T} # offset particle
     x_offset::T
     y_offset::T
     tilt::T
 end
 
-struct z_correction{T}
+struct z_correction{T} # z energy correction
     pz::T
     p0c::T
     mass::T
     ds::T
 end
 
+struct quad_calc_input{T}  # input vals for quad_mat2_calc
+    k1::T
+    len::T
+    rel_p::T
+end
+
+
 """Intermediate structs in order 
 to not dynamically allocate memory to
 intermediate calculations"""
 
-struct Intermediate_Drift{T}
+struct Intermediate_Drift{T} # track a drift
     P::T
     Px::T
     Py::T
@@ -44,7 +51,7 @@ struct Intermediate_Drift{T}
     dz::T
 end
 
-struct Intermediate_Set{T}
+struct Intermediate_Set{T} # offset particle
     x_ele_int::T
     x_ele::T
     y_ele::T
@@ -54,7 +61,8 @@ struct Intermediate_Set{T}
     c::T
 end
 
-struct Intermediate_Unset{T}
+
+struct Intermediate_Unset{T} # offset particle
     x_lab::T
     y_lab::T
     px_lab::T
@@ -63,10 +71,24 @@ struct Intermediate_Unset{T}
     c::T
 end
 
-struct Intermediate_z_Correction{T}
+struct Intermediate_z_Correction{T} # z energy correction
     beta::T
     beta0::T
     e_tot::T
     evaluation::T
     dz::T
+end
+
+struct Intermediate_Elements{T} # quad_mat2_calc intermediate steps
+    sqrt_k::T
+    sk_l::T
+    cx::T
+    sx::T
+    a11::T
+    a12::T
+    a21::T
+    a22::T
+    c1::T
+    c2::T
+    c3::T
 end
