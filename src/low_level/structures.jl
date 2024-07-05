@@ -38,6 +38,7 @@ struct Intermediate_Drift{T}
 end
 
 struct Intermediate_Set{T}
+    x_ele_int::T
     x_ele::T
     y_ele::T
     px_ele::T

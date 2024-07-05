@@ -1,10 +1,11 @@
-using CUDA, BenchmarkTools, Adapt
+using CUDA
+using Adapt: adapt_structure
 include("low_level/sqrt_one.jl")
 include("low_level/structures.jl")
 
 """Adapting structures to bitstype"""
-Adapt.@adapt_structure GPU_Particle; Adapt.@adapt_structure GPU_Drift; 
-Adapt.@adapt_structure Intermediate;
+Adapt.@adapt_structure Particle; Adapt.@adapt_structure Drift; 
+Adapt.@adapt_structure Intermediate_Drift;
 
 function track_a_drift_gpu!(p_in, drift, inter)
 """Tracks incoming Particles p_in  on a GPU through 
