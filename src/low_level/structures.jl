@@ -24,6 +24,13 @@ struct offset_and_tilt{T}
     tilt::T
 end
 
+struct z_correction{T}
+    pz::T
+    p0c::T
+    mass::T
+    ds::T
+end
+
 """Intermediate structs in order 
 to not dynamically allocate memory to
 intermediate calculations"""
@@ -54,4 +61,12 @@ struct Intermediate_Unset{T}
     py_lab::T
     s::T
     c::T
+end
+
+struct Intermediate_z_Correction{T}
+    beta::T
+    beta0::T
+    e_tot::T
+    evaluation::T
+    dz::T
 end
