@@ -1,15 +1,12 @@
 using CUDA
-import Adapt.@adapt_structure
 include("structures.jl")
-
-Adapt.@adapt_structure Particle; Adapt.@adapt_structure Intermediate_Set;
-Adapt.@adapt_structure Intermediate_Unset; Adapt.Adapt.@adapt_structure offset_and_tilt;
 
 function offset_particle_set(corrections, p_lab, int)
     """Transform from lab to element coords.
     See Bmad manual (2022-11-06) sections 5.6.1, 15.3.1 and 24.2
     **NOTE**: transverse only as of now.
     """
+
     x_ele_int, x_ele, y_ele, px_ele, py_ele, s, c = int.x_ele_int, 
     int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.s, int.c
 
@@ -35,8 +32,7 @@ function offset_particle_set(corrections, p_lab, int)
        
         i += stride
     end
-
-    return
+    return nothing
 end
 
 function offset_particle_unset(corrections, p_ele, int)
@@ -68,6 +64,8 @@ function offset_particle_unset(corrections, p_ele, int)
         py_lab[i] = px[i]*s[i] + py[i]*c[i];)
         
         i += stride 
+     
     end
-    return
+    return nothing
 end
+

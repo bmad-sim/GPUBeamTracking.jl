@@ -1,24 +1,22 @@
- """Structures used for particle tracking on GPU;
-adapt type with Adapt.@adapt_structure in main program"""
+using Adapt
 
-struct Particle{T} # used in several scripts
+struct particle{T} # used in several scripts
     x::T
     px::T
     y::T
     py::T
     z::T
     pz::T
-    s::T
+    sec::Float64
     p0c::T
-    mc2::T
-
+    mc2::Float64
 end
 
-struct Drift{T} # track a drift
+struct drift{T} # track_a_drift
     L::T
 end
 
-struct offset_and_tilt{T} # offset particle
+struct offset_and_tilt{T} # offset_particle
     x_offset::T
     y_offset::T
     tilt::T
@@ -31,10 +29,19 @@ struct z_correction{T} # z energy correction
     ds::T
 end
 
-struct quad_calc_input{T}  # input vals for quad_mat2_calc
+struct quad_calc_input{T}  # quad_mat2_calc
     k1::T
-    len::T
+    len::Float64
     rel_p::T
+end
+
+struct quad_input{T}  #track_a_quadrupole
+    L::Float64
+    K1::T
+    NUM_STEPS::Number
+    X_OFFSET::T
+    Y_OFFSET::T
+    TILT::T
 end
 
 
@@ -42,7 +49,7 @@ end
 to not dynamically allocate memory to
 intermediate calculations"""
 
-struct Intermediate_Drift{T} # track a drift
+struct int_drift{T} # track_a_drift
     P::T
     Px::T
     Py::T
@@ -51,7 +58,7 @@ struct Intermediate_Drift{T} # track a drift
     dz::T
 end
 
-struct Intermediate_Set{T} # offset particle
+struct int_set{T} # offset_particle
     x_ele_int::T
     x_ele::T
     y_ele::T
@@ -61,17 +68,14 @@ struct Intermediate_Set{T} # offset particle
     c::T
 end
 
-
-struct Intermediate_Unset{T} # offset particle
+struct int_unset{T}
     x_lab::T
     y_lab::T
     px_lab::T
     py_lab::T
-    s::T
-    c::T
 end
 
-struct Intermediate_z_Correction{T} # z energy correction
+struct int_z_correction{T} # z energy correction
     beta::T
     beta0::T
     e_tot::T
@@ -79,7 +83,7 @@ struct Intermediate_z_Correction{T} # z energy correction
     dz::T
 end
 
-struct Intermediate_Elements{T} # quad_mat2_calc intermediate steps
+struct int_elements{T} # quad_mat2_calc intermediate steps
     sqrt_k::T
     sk_l::T
     cx::T
@@ -92,3 +96,13 @@ struct Intermediate_Elements{T} # quad_mat2_calc intermediate steps
     c2::T
     c3::T
 end
+
+"""adapting structs to bitstype"""
+Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
+Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_input;
+Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
+Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_elements;
+
+"""Structures used for particle tracking on GPU;
+adapt type with Adapt.@adapt_structure in main program"""
+

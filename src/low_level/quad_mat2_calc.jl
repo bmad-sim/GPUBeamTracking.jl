@@ -1,7 +1,5 @@
-using CUDA, BenchmarkTools, Adapt
+using CUDA, Adapt
 include("structures.jl")
-
-Adapt.@adapt_structure Intermediate_Elements; Adapt.@adapt_structure quad_calc_input;
 
 function quad_mat2_calc(input, int)
     """Returns 2x2 transfer matrix elements aij and the
@@ -48,4 +46,3 @@ function quad_mat2_calc(input, int)
     end
     return
 end
-
