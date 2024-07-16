@@ -1,7 +1,7 @@
-using CUDA, Adapt
+using CUDA
 include("low_level/structures.jl"); include("low_level/offset_particle.jl"); include("low_level/int_arrays.jl");
 
-fill_quadrupole(10_000)
+fill_quadrupole(10_000);
 
 function track_a_quadrupole(p_in, quad)
     """Tracks the incoming Particle p_in though quad element and
@@ -18,17 +18,14 @@ function track_a_quadrupole(p_in, quad)
     tilt = quad.TILT
 
     corrections = offset_and_tilt(x_off, y_off, tilt)
-    int = int_set(x_ele_int, x_ele, y_ele, px_ele, py_ele, s, c)
 
     sec = p_in.sec
     p0c = p_in.p0c
     mc2 = p_in.mc2
 
     # --- TRACKING --- :
-
-    offset_particle_set(corrections, p_in, int)
+    @cuda threads=768 blocks=14 dynamic=true offset_particle_set(corrections, p_in, int)  # error
     x, px, y, py, z, pz = x_ele, px_ele, y_ele, py_ele, p_in.z, p_in.pz
 
     return nothing
 end
-

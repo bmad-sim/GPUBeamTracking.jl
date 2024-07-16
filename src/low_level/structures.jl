@@ -38,7 +38,7 @@ end
 struct quad_input{T}  #track_a_quadrupole
     L::Float64
     K1::T
-    NUM_STEPS::Number
+    NUM_STEPS::Int32
     X_OFFSET::T
     Y_OFFSET::T
     TILT::T

@@ -1,6 +1,7 @@
 using CUDA
 include("structures.jl")
 
+
 function offset_particle_set(corrections, p_lab, int)
     """Transform from lab to element coords.
     See Bmad manual (2022-11-06) sections 5.6.1, 15.3.1 and 24.2
