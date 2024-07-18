@@ -7,9 +7,8 @@ function offset_particle_set(corrections, p_lab, int)
     See Bmad manual (2022-11-06) sections 5.6.1, 15.3.1 and 24.2
     **NOTE**: transverse only as of now.
     """
-
-    x_ele_int, x_ele, y_ele, px_ele, py_ele, s, c = int.x_ele_int, 
-    int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.s, int.c
+    x_ele_int, x_ele, y_ele, px_ele, py_ele, S, C = int.x_ele_int, 
+    int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.S, int.C
 
     x, px, y, py = p_lab.x, p_lab.px, p_lab.y, p_lab.py
 
@@ -22,14 +21,14 @@ function offset_particle_set(corrections, p_lab, int)
     i = index
     while i <= length(x)
 
-        @inbounds (s[i] = sin(tilt[i]);
-        c[i] = cos(tilt[i]);
+        @inbounds (S[i] = sin(tilt[i]);
+        C[i] = cos(tilt[i]);
         x_ele_int[i] = x[i] - x_offset[i];
         y_ele[i] = y[i] - y_offset[i];
-        x_ele[i] = x_ele_int[i]*c[i] + y_ele[i]*s[i]; 
-        y_ele[i] = -x_ele_int[i]*s[i] + y_ele[i]*c[i];
-        px_ele[i] = px[i]*c[i] + py[i]*s[i];
-        py_ele[i] = -px[i]*s[i] + py[i]*c[i];)
+        x_ele[i] = x_ele_int[i]*C[i] + y_ele[i]*S[i]; 
+        y_ele[i] = -x_ele_int[i]*S[i] + y_ele[i]*C[i];
+        px_ele[i] = px[i]*C[i] + py[i]*S[i];
+        py_ele[i] = -px[i]*S[i] + py[i]*C[i];)
        
         i += stride
     end
@@ -41,8 +40,8 @@ function offset_particle_unset(corrections, p_ele, int)
     See Bmad manual (2022-11-06) sections 5.6.1, 15.3.1 and 24.2
     **NOTE**: transverse only as of now.
     """
-    x_lab, y_lab, px_lab, py_lab, s, c = int.x_lab, 
-    int.y_lab, int.px_lab, int.py_lab, int.s, int.c
+    x_lab, y_lab, px_lab, py_lab, S, C = int.x_lab, 
+    int.y_lab, int.px_lab, int.py_lab, int.S, int.C
     
     x, px, y, py = p_ele.x, p_ele.px, p_ele.y, p_ele.py
     
@@ -55,17 +54,17 @@ function offset_particle_unset(corrections, p_ele, int)
     i = index
     while i <= length(x)
 
-        @inbounds (s[i] = sin(tilt[i]);
-        c[i] = cos(tilt[i]);
-        x_lab[i] = x[i]*c[i] - y[i]*s[i];
-        y_lab[i] = x[i]*s[i] + y[i]*c[i];
+        @inbounds (S[i] = sin(tilt[i]);
+        C[i] = cos(tilt[i]);
+        x_lab[i] = x[i]*C[i] - y[i]*S[i];
+        y_lab[i] = x[i]*S[i] + y[i]*C[i];
         x_lab[i] = x_lab[i] + x_offset[i];
         y_lab[i] = y_lab[i] + y_offset[i];
-        px_lab[i] = px[i]*c[i] - py[i]*s[i];
-        py_lab[i] = px[i]*s[i] + py[i]*c[i];)
+        px_lab[i] = px[i]*C[i] - py[i]*S[i];
+        py_lab[i] = px[i]*S[i] + py[i]*C[i];)
         
         i += stride 
-     
+    
     end
     return nothing
 end

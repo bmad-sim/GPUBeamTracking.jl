@@ -1,7 +1,5 @@
-using CUDA, Adapt
+using CUDA
 include("structures.jl")
-
-Adapt.@adapt_structure z_correction; Adapt.@adapt_structure Intermediate_z_Correction;
 
 function low_energy_z_correction(z_calc, int)
     """Corrects the change in z-coordinate due to speed < c_light.
@@ -12,6 +10,7 @@ function low_energy_z_correction(z_calc, int)
         dz -- dz=(ds-d_particle) + ds*(beta - beta_ref)/beta_ref
     """
     beta, beta0, e_tot, evaluation, dz = int.beta, int.beta0, int.e_tot, int.evaluation, int.dz
+    
     pz, p0c, mass, ds = z_calc.pz, z_calc.p0c, z_calc.mass, z_calc.ds
 
     index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x

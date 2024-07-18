@@ -7,13 +7,13 @@ struct particle{T} # used in several scripts
     py::T
     z::T
     pz::T
-    sec::Float64
+    s::Float64
     p0c::T
     mc2::Float64
 end
 
 struct drift{T} # track_a_drift
-    L::T
+    L::Float64
 end
 
 struct offset_and_tilt{T} # offset_particle
@@ -30,14 +30,14 @@ struct z_correction{T} # z energy correction
 end
 
 struct quad_calc_input{T}  # quad_mat2_calc
-    k1::T
+    k1::Float64
     len::Float64
     rel_p::T
 end
 
 struct quad_input{T}  #track_a_quadrupole
     L::Float64
-    K1::T
+    K1::Float64
     NUM_STEPS::Int32
     X_OFFSET::T
     Y_OFFSET::T
@@ -64,8 +64,8 @@ struct int_set{T} # offset_particle
     y_ele::T
     px_ele::T
     py_ele::T
-    s::T
-    c::T
+    S::T
+    C::T
 end
 
 struct int_unset{T}
@@ -102,7 +102,4 @@ Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_stru
 Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_input;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
 Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_elements;
-
-"""Structures used for particle tracking on GPU;
-adapt type with Adapt.@adapt_structure in main program"""
 

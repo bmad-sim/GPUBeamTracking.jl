@@ -1,4 +1,4 @@
-using CUDA, Adapt
+using CUDA
 include("structures.jl")
 
 function quad_mat2_calc(input, int)
@@ -27,20 +27,20 @@ function quad_mat2_calc(input, int)
 
     i = index
     while i <= length(rel_p)
-        sqrt_k[i] = sqrt(abs(k1[i])+eps)
-        sk_l[i] = sqrt_k[i] * len[i]
+        sqrt_k[i] = sqrt(abs(k1)+eps)
+        sk_l[i] = sqrt_k[i] * len
         
-        cx[i] = cos(sk_l[i]) * (k1[i]<=0) + cosh(sk_l[i]) * (k1[i]>0) 
-        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1[i]>0)
+        cx[i] = cos(sk_l[i]) * (k1<=0) + cosh(sk_l[i]) * (k1>0) 
+        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1>0)
             
         a11[i] = cx[i]
         a12[i] = sx[i] / rel_p[i]
-        a21[i] = k1[i] * sx[i] * rel_p[i]
+        a21[i] = k1 * sx[i] * rel_p[i]
         a22[i] = cx[i]
             
-        c1[i] = k1[i] * (-cx[i] * sx[i] + len[i]) / 4
-        c2[i] = -k1[i] * sx[i]^2 / (2 * rel_p[i])
-        c3[i] = -(cx[i] * sx[i] + len[i]) / (4 * rel_p[i]^2)
+        c1[i] = k1 * (-cx[i] * sx[i] + len) / 4
+        c2[i] = -k1 * sx[i]^2 / (2 * rel_p[i])
+        c3[i] = -(cx[i] * sx[i] + len) / (4 * rel_p[i]^2)
 
         i += stride
     end
