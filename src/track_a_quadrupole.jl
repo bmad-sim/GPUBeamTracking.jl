@@ -1,7 +1,8 @@
 using CUDA
+
 include("low_level/structures.jl"); include("low_level/offset_particle.jl"); include("low_level/int_arrays.jl");
 
-function track_a_quadrupole(p_in, quad)
+function track_a_quadrupole!(p_in, quad, int)
     """Tracks the incoming Particle p_in though quad element and
     returns the outgoing particle.
     See Bmad manual section 24.15
@@ -11,36 +12,31 @@ function track_a_quadrupole(p_in, quad)
     y_off = quad.Y_OFFSET
     tilt = quad.TILT
 
-    int = int_set(x_ele_int, x_ele, y_ele, px_ele, py_ele, S, C)
-
-    x_ele_int, x_ele, y_ele, px_ele, py_ele, S, C = int.x_ele_int, 
-    int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.S, int.C
+    x_ele, y_ele, px_ele, py_ele, S, C = int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.S, int.C
     
     # --- TRACKING --- :
     x, px, y, py = p_in.x, p_in.px, p_in.y, p_in.py
+    
+    index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
+    stride = gridDim().x * blockDim().x
+
     """offset_particle_set"""
     i = index
     while i <= length(x)
 
         @inbounds (S[i] = sin(tilt[i]);
         C[i] = cos(tilt[i]);
-        x_ele_int[i] = x[i] - x_off[i];
-        y_ele[i] = y[i] - y_off[i];
-        x_ele[i] = x_ele_int[i]*C[i] + y_ele[i]*S[i]; 
-        y_ele[i] = -x_ele_int[i]*S[i] + y_ele[i]*C[i];
+        x[i] -= x_off[i];
+        y[i] -= y_off[i];
+        x_ele[i] = x[i]*C[i] + y[i]*S[i]; 
+        y[i] = -x[i]*S[i] + y[i]*C[i];
         px_ele[i] = px[i]*C[i] + py[i]*S[i];
-        py_ele[i] = -px[i]*S[i] + py[i]*C[i];)
-       
+        py[i] *= C[i];
+        py[i] -= px[i]*S[i];)
         i += stride
     end
 
-    x, px, y, py, z, pz = x_ele, px_ele, y_ele, py_ele, p_in.z, p_in.pz
-
-    l = quad.L
-    k1 = quad.K1
-    n_step = quad.NUM_STEPS  # number of divisions
-    step_len = l / n_step  # length of division
-    l = step_len
+    x, px, z, pz = x_ele, px_ele, p_in.z, p_in.pz
 
     i = index
     while i <= length(x)
@@ -73,6 +69,15 @@ function track_a_quadrupole(p_in, quad)
         end
         i += stride   
     end
+
+    l = quad.L
+    k1 = quad.K1
+    n_step = quad.NUM_STEPS  # number of divisions
+    l /= n_step  # length of division
+    
+        
+    
+
     """continue"""
     s = p_in.s
     p0c = p_in.p0c

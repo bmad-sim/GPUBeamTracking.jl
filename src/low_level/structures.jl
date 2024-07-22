@@ -42,12 +42,12 @@ struct quad_input{T}  #track_a_quadrupole
     X_OFFSET::T
     Y_OFFSET::T
     TILT::T
+    rel_p::T
 end
 
 
-"""Intermediate structs in order 
-to not dynamically allocate memory to
-intermediate calculations"""
+"""Intermediate calculation structs
+producing temporary CuArrays"""
 
 struct int_drift{T} # track_a_drift
     P::T
@@ -59,11 +59,8 @@ struct int_drift{T} # track_a_drift
 end
 
 struct int_set{T} # offset_particle
-    x_ele_int::T
     x_ele::T
-    y_ele::T
     px_ele::T
-    py_ele::T
     S::T
     C::T
 end

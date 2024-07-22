@@ -1,5 +1,5 @@
 using CUDA
-include("structures.jl")
+include("structures.jl"); include("int_arrays.jl");
 
 
 function offset_particle_set(corrections, p_lab, int)
@@ -7,8 +7,7 @@ function offset_particle_set(corrections, p_lab, int)
     See Bmad manual (2022-11-06) sections 5.6.1, 15.3.1 and 24.2
     **NOTE**: transverse only as of now.
     """
-    x_ele_int, x_ele, y_ele, px_ele, py_ele, S, C = int.x_ele_int, 
-    int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.S, int.C
+    x_ele, px_ele, S, C = int.x_ele, int.px_ele, int.S, int.C
 
     x, px, y, py = p_lab.x, p_lab.px, p_lab.y, p_lab.py
 
@@ -23,12 +22,13 @@ function offset_particle_set(corrections, p_lab, int)
 
         @inbounds (S[i] = sin(tilt[i]);
         C[i] = cos(tilt[i]);
-        x_ele_int[i] = x[i] - x_offset[i];
-        y_ele[i] = y[i] - y_offset[i];
-        x_ele[i] = x_ele_int[i]*C[i] + y_ele[i]*S[i]; 
-        y_ele[i] = -x_ele_int[i]*S[i] + y_ele[i]*C[i];
+        x[i] -= x_off[i];
+        y[i] -= y_off[i];
+        x_ele[i] = x[i]*C[i] + y[i]*S[i]; 
+        y[i] = -x[i]*S[i] + y[i]*C[i];
         px_ele[i] = px[i]*C[i] + py[i]*S[i];
-        py_ele[i] = -px[i]*S[i] + py[i]*C[i];)
+        py[i] *= C[i];
+        py[i] -= px[i]*S[i];)
        
         i += stride
     end
