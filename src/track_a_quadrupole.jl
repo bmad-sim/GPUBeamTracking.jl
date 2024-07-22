@@ -97,23 +97,3 @@ function track_a_quadrupole!(p_in, quad, int)
     return nothing
 end
 
-fill_quadrupole(10_000);
-x = CUDA.fill(1.0, 10_000); px = CUDA.fill(0.8, 10_000); y = CUDA.fill(1.0, 10_000);
-py = CUDA.fill(0.85, 10_000); z = CUDA.fill(0.5, 10_000); pz = CUDA.fill(0.2, 10_000);
-s = 1.0; p0c = CUDA.fill(1.184, 10_000); mc2 = 0.511;
-
-NUM_STEPS = Int32(1000); K1 = CUDA.fill(2.0, 10_000); L = 0.2;
-TILT = CUDA.fill(1.0, 10_000); X_OFFSET = CUDA.fill(0.006, 10_000); Y_OFFSET = CUDA.fill(0.01, 10_000); 
-
-
-p_in = particle(x, px, y, py, z, pz, s, p0c, mc2);
-quad = quad_input(L, K1, NUM_STEPS, X_OFFSET, Y_OFFSET, TILT);
-int = int_quad_elements(x_ele, px_ele, S, C, sqrt_k, sk_l, sx, ax11, ax12, 
-                        ax21, ay11, ay12, ay21, cx1, cx2, cx3, cy1, cy2, cy3, b1, rel_p);
-
-kernel = @cuda launch=false track_a_quadrupole!(p_in, quad, int)
-config = launch_configuration(kernel.fun)
-Threads = min(config.threads, length(x))
-Blocks = cld(length(x), Threads)
-
-@cuda threads=Threads blocks=Blocks track_a_quadrupole!(p_in, quad, int)
