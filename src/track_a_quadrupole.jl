@@ -44,43 +44,50 @@ function track_a_quadrupole!(p_in, quad, int)
         y[i] = -x[i]*S[i] + y[i]*C[i];
         px_ele[i] = px[i]*C[i] + py[i]*S[i];
         py[i] *= C[i];
-        py[i] -= px[i]*S[i];
+        py[i] -= px[i]*S[i];)
 
-        # transfer matrix elements and coefficients for x-coord
-        rel_p[i] = 1 + pz[i];
-        k1[i] = b1[i]/(l*rel_p[i]);
-        
-        sqrt_k[i] = sqrt(abs(-k1[i])+eps);
-        sk_l[i] = sqrt_k[i] * l;
-        
-        ax11[i] = cos(sk_l[i]) * (-k1[i]<=0) + cosh(sk_l[i]) * (-k1[i]>0);
-        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(-k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(-k1[i]>0);
+        for j in eachindex(n_step)
+            # transfer matrix elements and coefficients for x-coord
+            @inbounds (rel_p[i] = 1 + pz[i];
+            k1[i] = b1[i]/(l*rel_p[i]);
             
-        ax12[i] = sx[i] / rel_p[i];
-        ax21[i] = -k1[i] * sx[i] * rel_p[i];
+            sqrt_k[i] = sqrt(abs(-k1[i])+eps);
+            sk_l[i] = sqrt_k[i] * l;
             
-        cx1[i] = -k1[i] * (-ax11[i] * sx[i] + l) / 4;
-        cx2[i] = k1[i] * sx[i]^2 / (2 * rel_p[i]);
-        cx3[i] = -(ax11[i] * sx[i] + l) / (4 * rel_p[i]^2);
-        
-        # transfer matrix elements and coefficients for y-coord
-        ay11[i] = cos(sk_l[i]) * (k1[i]<=0) + cosh(sk_l[i]) * (k1[i]>0);
-        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1[i]>0);
+            ax11[i] = cos(sk_l[i]) * (-k1[i]<=0) + cosh(sk_l[i]) * (-k1[i]>0);
+            sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(-k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(-k1[i]>0);
+                
+            ax12[i] = sx[i] / rel_p[i];
+            ax21[i] = -k1[i] * sx[i] * rel_p[i];
+                
+            cx1[i] = -k1[i] * (-ax11[i] * sx[i] + l) / 4;
+            cx2[i] = k1[i] * sx[i]^2 / (2 * rel_p[i]);
+            cx3[i] = -(ax11[i] * sx[i] + l) / (4 * rel_p[i]^2);
             
-        ay12[i] = sx[i] / rel_p[i];
-        ay21[i] = k1[i] * sx[i] * rel_p[i];
+            # transfer matrix elements and coefficients for y-coord
+            ay11[i] = cos(sk_l[i]) * (k1[i]<=0) + cosh(sk_l[i]) * (k1[i]>0);
+            sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1[i]>0);
+                
+            ay12[i] = sx[i] / rel_p[i];
+            ay21[i] = k1[i] * sx[i] * rel_p[i];
+                
+            cy1[i] = k1[i] * (-ay11[i] * sx[i] + l) / 4;
+            cy2[i] = -k1[i] * sx[i]^2 / (2 * rel_p[i]);
+            cy3[i] = -(ay11[i] * sx[i] + l) / (4 * rel_p[i]^2);
             
-        cy1[i] = k1[i] * (-ay11[i] * sx[i] + l) / 4;
-        cy2[i] = -k1[i] * sx[i]^2 / (2 * rel_p[i]);
-        cy3[i] = -(ay11[i] * sx[i] + l) / (4 * rel_p[i]^2);)
+            # z (without energy correction)
+            z[i] += ( cx1[i] * x_ele[i]^2 + cx2[i] * x_ele[i] * px_ele[i] + cx3[i] 
+            * px_ele[i]^2 + cy1[i] * y[i]^2 + cy2[i] * y[i] * py[i] + cy3[i] * py[i]^2 );
+            
+            # next index vals
+            x_ele[i] = ax11[i] * x_ele[i] + ax12[i] * px_ele[i];
+            px_ele[i] = ax21[i] * x_ele[i] + ax11[i] * px_ele[i];
+            y[i] = ay11[i] * y[i] + ay12[i] * py[i];
+            py[i] = ay21[i] * y[i] + ay11[i] * py[i];)
 
-        i += stride 
-
+        end
+        i += stride
     end
-
-    
-        
-    
 
     """continue"""
     s = p_in.s
@@ -95,7 +102,7 @@ x = CUDA.fill(1.0, 10_000); px = CUDA.fill(0.8, 10_000); y = CUDA.fill(1.0, 10_0
 py = CUDA.fill(0.85, 10_000); z = CUDA.fill(0.5, 10_000); pz = CUDA.fill(0.2, 10_000);
 s = 1.0; p0c = CUDA.fill(1.184, 10_000); mc2 = 0.511;
 
-NUM_STEPS = Int32(1000); K1 = CUDA.fill(1.0, 10_000); L = 0.5;
+NUM_STEPS = Int32(1000); K1 = CUDA.fill(2.0, 10_000); L = 0.2;
 TILT = CUDA.fill(1.0, 10_000); X_OFFSET = CUDA.fill(0.006, 10_000); Y_OFFSET = CUDA.fill(0.01, 10_000); 
 
 
@@ -104,7 +111,9 @@ quad = quad_input(L, K1, NUM_STEPS, X_OFFSET, Y_OFFSET, TILT);
 int = int_quad_elements(x_ele, px_ele, S, C, sqrt_k, sk_l, sx, ax11, ax12, 
                         ax21, ay11, ay12, ay21, cx1, cx2, cx3, cy1, cy2, cy3, b1, rel_p);
 
-@cuda threads=1024 blocks=10 track_a_quadrupole!(p_in, quad, int)
-print(x_ele[1:3])
-print(y[1:3])
-print(cx1[1:3])
+kernel = @cuda launch=false track_a_quadrupole!(p_in, quad, int)
+config = launch_configuration(kernel.fun)
+Threads = min(config.threads, length(x))
+Blocks = cld(length(x), Threads)
+
+@cuda threads=Threads blocks=Blocks track_a_quadrupole!(p_in, quad, int)
