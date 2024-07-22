@@ -7,15 +7,24 @@ function track_a_quadrupole!(p_in, quad, int)
     returns the outgoing particle.
     See Bmad manual section 24.15
     """
-
+    l = quad.L
     x_off = quad.X_OFFSET
     y_off = quad.Y_OFFSET
     tilt = quad.TILT
+    k1 = quad.K1
+    n_step = quad.NUM_STEPS  # number of divisions
+    l /= n_step  # length of division
 
-    x_ele, y_ele, px_ele, py_ele, S, C = int.x_ele, int.y_ele, int.px_ele, int.py_ele, int.S, int.C
+    x_ele, px_ele, S, C, sqrt_k, sk_l, sx, ax11, ax12, ax21, cx1, 
+    cx2, cx3, ay11, ay12, ay21, cy1, cy2, cy3, b1, rel_p = int.x_ele, 
+    int.px_ele, int.S, int.C, int.sqrt_k, int.sk_l, int.sx, int.ax11, 
+    int.ax12, int.ax21, int.cx1, int.cx2, int.cx3, int.ay11, int.ay12, 
+    int.ay21, int.cy1, int.cy2, int.cy3, int.b1, int.rel_p
     
     # --- TRACKING --- :
-    x, px, y, py = p_in.x, p_in.px, p_in.y, p_in.py
+    x, px, y, py, z, pz = p_in.x, p_in.px, p_in.y, p_in.py, p_in.z, p_in.pz
+
+    eps = 2.220446049250313e-16  # machine epsilon to double precision
     
     index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
     stride = gridDim().x * blockDim().x
@@ -23,8 +32,11 @@ function track_a_quadrupole!(p_in, quad, int)
     """offset_particle_set"""
     i = index
     while i <= length(x)
-
-        @inbounds (S[i] = sin(tilt[i]);
+        
+        # set to particle coordinates
+        @inbounds (b1[i] = k1[i] * l;
+        
+        S[i] = sin(tilt[i]);
         C[i] = cos(tilt[i]);
         x[i] -= x_off[i];
         y[i] -= y_off[i];
@@ -32,48 +44,40 @@ function track_a_quadrupole!(p_in, quad, int)
         y[i] = -x[i]*S[i] + y[i]*C[i];
         px_ele[i] = px[i]*C[i] + py[i]*S[i];
         py[i] *= C[i];
-        py[i] -= px[i]*S[i];)
-        i += stride
-    end
+        py[i] -= px[i]*S[i];
 
-    x, px, z, pz = x_ele, px_ele, p_in.z, p_in.pz
-
-    i = index
-    while i <= length(x)
+        # transfer matrix elements and coefficients for x-coord
+        rel_p[i] = 1 + pz[i];
+        k1[i] = b1[i]/(l*rel_p[i]);
         
-        int = int_elements(sqr_k, sk_l, cx, sx, a11, a12, a21, a22, c1, c2, c3)
+        sqrt_k[i] = sqrt(abs(-k1[i])+eps);
+        sk_l[i] = sqrt_k[i] * l;
         
-        sqrt_k, sk_l, cx, sx, a11, a12, a21, a22, c1, c2, c3 = int.sqrt_k, int.sk_l,
-        int.cx, int.sx, int.a11, int.a12, int.a21, int.a22, int.c1, int.c2, int.c3
-
-
-        for j in range(n_step)
-        """quad_mat2_calc, y transfer
-        matrix elements and coefficients"""
-            eps = 2.220446049250313e-16  # machine epsilon to double precision
-        
-            sqrt_k[i] = sqrt(abs(k1)+eps)
-            sk_l[i] = sqrt_k[i] * len
+        ax11[i] = cos(sk_l[i]) * (-k1[i]<=0) + cosh(sk_l[i]) * (-k1[i]>0);
+        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(-k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(-k1[i]>0);
             
-            cx[i] = cos(sk_l[i]) * (k1<=0) + cosh(sk_l[i]) * (k1>0) 
-            sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1>0)
-                
-            a11[i] = cx[i]
-            a12[i] = sx[i] / rel_p[i]
-            a21[i] = k1 * sx[i] * rel_p[i]
-            a22[i] = cx[i]
-                
-            c1[i] = k1 * (-cx[i] * sx[i] + l) / 4
-            c2[i] = -k1 * sx[i]^2 / (2 * rel_p[i])
-            c3[i] = -(cx[i] * sx[i] + l) / (4 * rel_p[i]^2)
-        end
-        i += stride   
+        ax12[i] = sx[i] / rel_p[i];
+        ax21[i] = -k1[i] * sx[i] * rel_p[i];
+            
+        cx1[i] = -k1[i] * (-ax11[i] * sx[i] + l) / 4;
+        cx2[i] = k1[i] * sx[i]^2 / (2 * rel_p[i]);
+        cx3[i] = -(ax11[i] * sx[i] + l) / (4 * rel_p[i]^2);
+        
+        # transfer matrix elements and coefficients for y-coord
+        ay11[i] = cos(sk_l[i]) * (k1[i]<=0) + cosh(sk_l[i]) * (k1[i]>0);
+        sx[i] = (sin(sk_l[i])/(sqrt_k[i]))*(k1[i]<=0) + (sinh(sk_l[i])/(sqrt_k[i]))*(k1[i]>0);
+            
+        ay12[i] = sx[i] / rel_p[i];
+        ay21[i] = k1[i] * sx[i] * rel_p[i];
+            
+        cy1[i] = k1[i] * (-ay11[i] * sx[i] + l) / 4;
+        cy2[i] = -k1[i] * sx[i]^2 / (2 * rel_p[i]);
+        cy3[i] = -(ay11[i] * sx[i] + l) / (4 * rel_p[i]^2);)
+
+        i += stride 
+
     end
 
-    l = quad.L
-    k1 = quad.K1
-    n_step = quad.NUM_STEPS  # number of divisions
-    l /= n_step  # length of division
     
         
     
@@ -86,3 +90,21 @@ function track_a_quadrupole!(p_in, quad, int)
     return nothing
 end
 
+fill_quadrupole(10_000);
+x = CUDA.fill(1.0, 10_000); px = CUDA.fill(0.8, 10_000); y = CUDA.fill(1.0, 10_000);
+py = CUDA.fill(0.85, 10_000); z = CUDA.fill(0.5, 10_000); pz = CUDA.fill(0.2, 10_000);
+s = 1.0; p0c = CUDA.fill(1.184, 10_000); mc2 = 0.511;
+
+NUM_STEPS = Int32(1000); K1 = CUDA.fill(1.0, 10_000); L = 0.5;
+TILT = CUDA.fill(1.0, 10_000); X_OFFSET = CUDA.fill(0.006, 10_000); Y_OFFSET = CUDA.fill(0.01, 10_000); 
+
+
+p_in = particle(x, px, y, py, z, pz, s, p0c, mc2);
+quad = quad_input(L, K1, NUM_STEPS, X_OFFSET, Y_OFFSET, TILT);
+int = int_quad_elements(x_ele, px_ele, S, C, sqrt_k, sk_l, sx, ax11, ax12, 
+                        ax21, ay11, ay12, ay21, cx1, cx2, cx3, cy1, cy2, cy3, b1, rel_p);
+
+@cuda threads=1024 blocks=10 track_a_quadrupole!(p_in, quad, int)
+print(x_ele[1:3])
+print(y[1:3])
+print(cx1[1:3])

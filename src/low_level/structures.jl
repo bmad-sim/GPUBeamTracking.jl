@@ -42,7 +42,6 @@ struct quad_input{T}  #track_a_quadrupole
     X_OFFSET::T
     Y_OFFSET::T
     TILT::T
-    rel_p::T
 end
 
 
@@ -80,27 +79,33 @@ struct int_z_correction{T} # z energy correction
     dz::T
 end
 
-struct int_elements{T} # quad_mat2_calc intermediate steps
+struct int_quad_elements{T} 
+    x_ele::T
+    px_ele::T
+    S::T
+    C::T
     sqrt_k::T
     sk_l::T
-    cx::T
     sx::T
-    a11::T
-    a12::T
-    a21::T
-    a22::T
-    c1::T
-    c2::T
-    c3::T
-end
-
-struct track_quad{T}
+    ax11::T
+    ax12::T
+    ax21::T
+    ay11::T
+    ay12::T
+    ay21::T
+    cx1::T
+    cx2::T
+    cx3::T
+    cy1::T
+    cy2::T
+    cy3::T
     b1::T
+    rel_p::T
 end
 
 """adapting structs to bitstype"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
 Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_input;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
-Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_elements; Adapt.@adapt_structure track_quad
+Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad_elements; 
 
