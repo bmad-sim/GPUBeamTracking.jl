@@ -26,7 +26,7 @@ struct z_correction{T} # z energy correction
     pz::T
     p0c::T
     mass::T
-    ds::T
+    ds::Float64
 end
 
 struct quad_calc_input{T}  # quad_mat2_calc
@@ -35,9 +35,9 @@ struct quad_calc_input{T}  # quad_mat2_calc
     rel_p::T
 end
 
-struct quad_input{T}  #track_a_quadrupole
+struct quad_and_sextupole{T}  #track_a_quadrupole
     L::Float64
-    K1::T
+    K::T
     NUM_STEPS::Int32
     X_OFFSET::T
     Y_OFFSET::T
@@ -79,7 +79,7 @@ struct int_z_correction{T} # z energy correction
     dz::T
 end
 
-struct int_quad_elements{T} 
+struct int_quad{T} 
     x_ele::T
     px_ele::T
     S::T
@@ -87,25 +87,34 @@ struct int_quad_elements{T}
     sqrt_k::T
     sk_l::T
     sx::T
-    ax11::T
-    ax12::T
-    ax21::T
-    ay11::T
-    ay12::T
-    ay21::T
-    cx1::T
-    cx2::T
-    cx3::T
-    cy1::T
-    cy2::T
-    cy3::T
+    a11::T
+    a12::T
+    a21::T
+    c1::T
+    c2::T
+    c3::T
     b1::T
     rel_p::T
 end
 
+struct int_sextupole{T}
+    x_ele::T
+    px_ele::T
+    y_ele::T
+    S::T
+    C::T
+    b1::T
+    rel_p::T
+    beta::T
+    beta0::T
+    e_tot::T
+    evaluation::T
+    dz::T
+end
+
 """adapting structs to bitstype"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
-Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_input;
+Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_and_sextupole;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
-Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad_elements; 
+Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad; Adapt.@adapt_structure int_sextupole;
 
