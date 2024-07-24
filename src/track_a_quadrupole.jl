@@ -108,34 +108,3 @@ function track_a_quadrupole!(p_in, quad, int)
     return nothing
 end
 
-fill_quadrupole(10_000);
-x = CUDA.fill(1.0, 10_000); px = CUDA.fill(0.8, 10_000); y = CUDA.fill(1.0, 10_000);
-py = CUDA.fill(0.85, 10_000); z = CUDA.fill(0.5, 10_000); pz = CUDA.fill(0.2, 10_000);
-s = 1.0; p0c = CUDA.fill(1.184, 10_000); mc2 = 0.511;
-
-NUM_STEPS = Int32(1000); K1 = CUDA.fill(2.0, 10_000); L = 0.2;
-TILT = CUDA.fill(1.0, 10_000); X_OFFSET = CUDA.fill(0.006, 10_000); Y_OFFSET = CUDA.fill(0.01, 10_000);
-
-p_in = particle(x, px, y, py, z, pz, s, p0c, mc2);
-quad = quad_and_sextupole(L, K1, NUM_STEPS, X_OFFSET, Y_OFFSET, TILT);
-int = int_quad(x_ele, px_ele, S, C, sqrt_k, sk_l, sx, a11, a12,
-                        a21, c1, c2, c3, b1, rel_p);
-
-kernel = @cuda launch=false track_a_quadrupole!(p_in, quad, int);
-config = launch_configuration(kernel.fun)
-threads = config.threads
-blocks= cld(length(x), threads)
-
-@cuda threads=threads blocks=blocks track_a_quadrupole!(p_in, quad, int)
-
-print(c1[1:3])
-print(c2[1:3])
-print(c3[1:3])
-print(sqrt_k[1:3])
-print(sk_l[1:3])
-print(a11[1:3])
-print(sx[1:2])
-print(a12[1:2])
-print(K1[1:3])
-print(b1[1:3])
-print(rel_p[1:3])
