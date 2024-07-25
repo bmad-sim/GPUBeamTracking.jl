@@ -82,6 +82,7 @@ end
 struct int_quad{T} 
     x_ele::T
     px_ele::T
+    y_ele::T
     S::T
     C::T
     sqrt_k::T
@@ -95,6 +96,11 @@ struct int_quad{T}
     c3::T
     b1::T
     rel_p::T
+    beta::T
+    beta0::T
+    e_tot::T
+    evaluation::T
+    dz::T
 end
 
 struct int_sextupole{T}
@@ -103,8 +109,6 @@ struct int_sextupole{T}
     y_ele::T
     S::T
     C::T
-    b1::T
-    rel_p::T
     beta::T
     beta0::T
     e_tot::T

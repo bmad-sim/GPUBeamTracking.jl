@@ -17,12 +17,11 @@ function track_a_sextupole!(p_in, sextupole, int)
     y_off = sextupole.Y_OFFSET
     tilt = sextupole.TILT
     
-    s = p_in.s
     p0c = p_in.p0c
     mc2 = p_in.mc2
 
-    x_ele, px_ele, y_ele, S, C, b2, rel_p, beta, beta0, e_tot, evaluation,
-    dz = int.x_ele, int.px_ele, int.y_ele, int.S, int.C, int.b1, int.rel_p,
+    x_ele, px_ele, y_ele, S, C, beta, beta0, e_tot, evaluation,
+    dz = int.x_ele, int.px_ele, int.y_ele, int.S, int.C,
     int.beta, int.beta0, int.e_tot, int.evaluation, int.dz
     
     index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
@@ -37,8 +36,8 @@ function track_a_sextupole!(p_in, sextupole, int)
     while i <= length(x)
 
         # set to particle coordinates
-        @inbounds (
-        b2[i] = k2[i] * l;
+        @inbounds ( 
+        k2[i] /= (1 + pz[i]);  # sextupole strength divided by relative momentum (P/P0)
 
         S[i] = sin(tilt[i]);
         C[i] = cos(tilt[i]);
@@ -47,17 +46,14 @@ function track_a_sextupole!(p_in, sextupole, int)
         x_ele[i] = x[i]*C[i] + y[i]*S[i]; 
         y[i] = -x[i]*S[i] + y[i]*C[i];
         px_ele[i] = px[i]*C[i] + py[i]*S[i];
-        py[i] *= C[i];
-        py[i] -= px[i]*S[i];
+        py[i] = py[i]*C[i] - px[i]*S[i];
 
         x[i] = x_ele[i];
         px[i] = px_ele[i]; )
 
 
         while j <= n_step
-            @inbounds (rel_p[i] = 1 + pz[i];  # Particle's relative momentum (P/P0)
-            k2[i] = b2[i]/(l*rel_p[i]);
-
+            @inbounds (
             # next index
             x_ele[i] = x[i] + step_len * px[i];
             y_ele[i] = y[i] + step_len * py[i];
@@ -89,8 +85,8 @@ function track_a_sextupole!(p_in, sextupole, int)
 
         # setting back to lab frame
         @inbounds (
-        x_ele[i] = x[i]*C[i] - y[i]*S[i];
-        y[i] = x[i]*S[i] + y[i]*C[i];
+        x_ele[i] = x[i]*S[i] - y[i]*C[i];
+        y[i] = x[i]*C[i] + y[i]*S[i];
         x[i] = x_ele[i] + x_off[i];
         y[i] = y[i] + y_off[i];
         px_ele[i] = px[i]*C[i] - py[i]*S[i];
@@ -100,6 +96,7 @@ function track_a_sextupole!(p_in, sextupole, int)
         i += stride
         
     end
+    s = p_in.s + l
     return nothing
 end
 
