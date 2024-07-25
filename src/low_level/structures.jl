@@ -94,7 +94,6 @@ struct int_quad{T}
     c1::T
     c2::T
     c3::T
-    b1::T
     rel_p::T
     beta::T
     beta0::T
@@ -116,9 +115,26 @@ struct int_sextupole{T}
     dz::T
 end
 
+struct rf_time{T}
+    z::T
+    pz::T
+    p0c::T
+    mc2::Float64
+    beta::T
+    time::T
+end
+
+struct energy_kick{T}
+    beta::T
+    E::T
+    E_old::T
+    pc::T
+end
+
 """adapting structs to bitstype"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
 Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_and_sextupole;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
 Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad; Adapt.@adapt_structure int_sextupole;
+Adapt.@adapt_structure rf_time; Adapt.@adapt_structure energy_kick;
 
