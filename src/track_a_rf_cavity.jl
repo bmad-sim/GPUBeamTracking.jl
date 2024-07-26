@@ -115,11 +115,3 @@ function track_a_rf_cavity!(p_in, cav, int)
     return nothing
 end
 
-
-
-@cuda threads=numthreads blocks=numblocks track_a_rf_cavity!(p_in, cav, int)
-print(x[1:3])
-print(px[1:3])
-print(y[1:3])
-print(z[1:3])
-print(pz[1:3])
