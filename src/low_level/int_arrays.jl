@@ -25,3 +25,10 @@ function fill_rf(elements)
 
     return nothing
 end
+
+function fill_crab(elements)
+    global x_ele, px_ele, S, C, phase, pc, beta, E, time,
+    dz, P, Px, Py, Pxy2, Pl, dz = (CUDA.fill(0.0, elements) for item = 1:16)
+
+    return nothing
+end

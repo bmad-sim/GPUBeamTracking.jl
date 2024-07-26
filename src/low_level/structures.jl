@@ -49,7 +49,7 @@ struct cavity{T}
     X_OFFSET::T
     Y_OFFSET::T
     TILT::T
-    VOLTAGE::Float64
+    VOLTAGE::T
     PHI0::T
     RF_FREQUENCY::Float64
 end
@@ -162,6 +162,24 @@ struct int_rf{T}
     Pl::T
 end
 
+struct int_crab{T}
+    x_ele::T
+    px_ele::T
+    S::T
+    C::T
+    P::T
+    Px::T
+    Py::T
+    Pxy2::T
+    Pl::T
+    phase::T
+    beta::T
+    time::T
+    E::T
+    pc::T
+    dz::T
+end
+
 
 """adapting structs to bitstype"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
@@ -169,5 +187,5 @@ Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Ada
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
 Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad; Adapt.@adapt_structure int_sextupole;
 Adapt.@adapt_structure rf_time; Adapt.@adapt_structure energy_kick; Adapt.@adapt_structure cavity;
-Adapt.@adapt_structure int_rf;
+Adapt.@adapt_structure int_rf; Adapt.@adapt_structure int_crab;
 
