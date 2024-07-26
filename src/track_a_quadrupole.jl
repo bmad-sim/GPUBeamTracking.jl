@@ -20,9 +20,9 @@ function track_a_quadrupole!(p_in, quad, int)
     mc2 = p_in.mc2
 
     x_ele, px_ele, y_ele, S, C, sqrt_k, sk_l, sx, a11, a12, a21, c1, 
-    c2, c3, b1, rel_p, beta, beta0, e_tot, evaluation, dz = int.x_ele, 
+    c2, c3, rel_p, beta, beta0, e_tot, evaluation, dz = int.x_ele, 
     int.px_ele, int.y_ele, int.S, int.C, int.sqrt_k, int.sk_l, int.sx, int.a11, 
-    int.a12, int.a21, int.c1, int.c2, int.c3, int.b1, int.rel_p, int.beta, int.beta0,
+    int.a12, int.a21, int.c1, int.c2, int.c3, int.rel_p, int.beta, int.beta0,
     int.e_tot, int.evaluation, int.dz
     
     # --- TRACKING --- :
@@ -40,7 +40,7 @@ function track_a_quadrupole!(p_in, quad, int)
         
         # set to particle coordinates
         @inbounds (
-        b1[i] = K1[i] * l;
+        K1[i] /= (1 + pz[i]);
 
         S[i] = sin(tilt[i]);
         C[i] = cos(tilt[i]);
@@ -58,9 +58,6 @@ function track_a_quadrupole!(p_in, quad, int)
         while j <= n_step
             # transfer matrix elements and coefficients for x-coord
             @inbounds (
-            rel_p[i] = 1 + pz[i];
-            K1[i] = b1[i]/(l*rel_p[i]);
-
             K1[i] *= -1;
             
             sqrt_k[i] = sqrt(abs(K1[i]+eps));
@@ -88,7 +85,7 @@ function track_a_quadrupole!(p_in, quad, int)
             
             K1[i] *= -1;
 
-            sqrt_k[i] = sqrt(abs(-K1[i]+eps));
+            sqrt_k[i] = sqrt(abs(K1[i]+eps));
             sk_l[i] = sqrt_k[i] * step_len;
             
             # transfer matrix elements and coefficients for y-coord
@@ -147,4 +144,3 @@ function track_a_quadrupole!(p_in, quad, int)
     s = p_in.s + l
     return nothing
 end
-

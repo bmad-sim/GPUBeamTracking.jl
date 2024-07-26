@@ -44,6 +44,16 @@ struct quad_and_sextupole{T}  #track_a_quadrupole
     TILT::T
 end
 
+struct cavity{T}
+    L::Float64
+    X_OFFSET::T
+    Y_OFFSET::T
+    TILT::T
+    VOLTAGE::Float64
+    PHI0::T
+    RF_FREQUENCY::Float64
+end
+
 
 """Intermediate calculation structs
 producing temporary CuArrays"""
@@ -131,10 +141,33 @@ struct energy_kick{T}
     pc::T
 end
 
+struct int_rf{T}
+    x_ele::T
+    px_ele::T
+    S::T
+    C::T
+    phase::T
+    pc::T
+    beta::T
+    E::T
+    E_old::T
+    dE::T
+    time::T
+    z_old::T
+    dz::T
+    P::T
+    Px::T
+    Py::T
+    Pxy2::T
+    Pl::T
+end
+
+
 """adapting structs to bitstype"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
 Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_and_sextupole;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
 Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad; Adapt.@adapt_structure int_sextupole;
-Adapt.@adapt_structure rf_time; Adapt.@adapt_structure energy_kick;
+Adapt.@adapt_structure rf_time; Adapt.@adapt_structure energy_kick; Adapt.@adapt_structure cavity;
+Adapt.@adapt_structure int_rf;
 
