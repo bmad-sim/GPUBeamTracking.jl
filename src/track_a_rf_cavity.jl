@@ -3,8 +3,8 @@ include("low_level/structures.jl"); include("low_level/int_arrays.jl"); include(
 include("low_level/constants.jl");
 
 function track_a_rf_cavity!(p_in, cav, int)
-    """Tracks an incomming Particle p_in through rf cavity and
-    returns the ourgoing particle. 
+    """Tracks incomming particles p_in through rf cavity and
+    returns the outgoing particles. 
     See Bmad manual section 4.9
     """
     p0c = p_in.p0c
@@ -27,6 +27,7 @@ function track_a_rf_cavity!(p_in, cav, int)
     int.pc, int.beta, int.E, int.E_old, int.dE, int.time, int.z_old, int.dz,
     int.P, int.Px, int.Py, int.Pxy2, int.Pl
 
+    # indexing threads and defining kernel grid length (stride)
     index = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
     stride = blockDim().x * gridDim().x
 
@@ -52,7 +53,7 @@ function track_a_rf_cavity!(p_in, cav, int)
         phase[i] = 2 * pi * (phi0[i] - (time[i]*rf_freq));
         
         # energy change dE
-        dE[i] = voltage * sin(phase[i]) / 2;
+        dE[i] = voltage[i] * sin(phase[i]) / 2;
 
         # apply energy kick
         pc[i] = (1 + pz[i]) * p0c[i];
@@ -70,8 +71,8 @@ function track_a_rf_cavity!(p_in, cav, int)
         z_old[i] = z[i];
 
         P[i] = pz[i] + 1;              # CuArray of each Particle's total momentum over p0
-        Px[i] = px_ele[i] / P[i];                 # CuArray of each Particle's 'x' momentum over p0
-        Py[i] = py[i] / P[i];                 # CuArray of each Particle's 'y' momentum over p0
+        Px[i] = px_ele[i] / P[i];      # CuArray of each Particle's 'x' momentum over p0
+        Py[i] = py[i] / P[i];          # CuArray of each Particle's 'y' momentum over p0
         Pxy2[i] = Px[i]^2 + Py[i]^2;   # CuArray of each Particle's transverse momentum^2 over p0^2
         Pl[i] = sqrt(1 - Pxy2[i]);     # CuArray of each Particle's longitudinal momentum over p0
 
@@ -83,11 +84,12 @@ function track_a_rf_cavity!(p_in, cav, int)
         + sqrt_one(-Pxy2[i])/Pl[i]);
         
         z[i] += dz[i];
-    
+        
+        # apply second energy kick
         beta[i] = (1+pz[i]) * p0c[i] / sqrt(((1+pz[i])*p0c[i])^2 + mc2^2);  # beta new
         phase[i] += 2 * pi * rf_freq * (z[i]-z_old[i])/(c_0*beta[i]);
 
-        dE[i] = voltage * sin(phase[i]) / 2;
+        dE[i] = voltage[i] * sin(phase[i]) / 2;
 
         pc[i] = (1 + pz[i]) * p0c[i];
         beta[i]= (1+pz[i]) * p0c[i] / sqrt(((1+pz[i])*p0c[i])^2 + mc2^2);
@@ -101,6 +103,7 @@ function track_a_rf_cavity!(p_in, cav, int)
         beta[i] = pc[i] / E[i] ; # beta_new
         z[i] *= beta[i]; 
 
+        # set frame back to lab
         x[i] = x_ele[i]*C[i] - y[i]*S[i];
         y[i] = x_ele[i]*S[i] + y[i]*C[i];
         x[i] += x_off[i];
@@ -110,8 +113,6 @@ function track_a_rf_cavity!(p_in, cav, int)
 
         i += stride
     end
-    s = p_in.s
-    s += l
+    s = p_in.s + l
     return nothing
 end
-

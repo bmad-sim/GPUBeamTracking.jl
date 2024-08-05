@@ -1,7 +1,8 @@
 using CUDA
-include("low_level/sqrt_one.jl"); include("low_level/structures.jl")
+include("low_level/sqrt_one.jl"); include("low_level/structures.jl"); 
+include("low_level/int_arrays.jl");
 
-function track_a_drift_gpu!(p_in, drift, int)
+function track_a_drift!(p_in, drift, int)
 """Tracks incoming Particles p_in  on a GPU through 
 drift elements. See Bmad manual section 24.9 
 """
@@ -39,5 +40,3 @@ drift elements. See Bmad manual section 24.9
     s += L
     return nothing
 end
-
-

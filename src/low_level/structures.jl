@@ -13,7 +13,7 @@ struct particle{T} # used in several scripts
 end
 
 struct drift{T} # track_a_drift
-    L::Float64
+    L::T
 end
 
 struct offset_and_tilt{T} # offset_particle
@@ -44,7 +44,7 @@ struct quad_and_sextupole{T}  #track_a_quadrupole
     TILT::T
 end
 
-struct cavity{T}
+struct cavity{T}  # track_a_rf_cavity, track_a_crab_cavity
     L::Float64
     X_OFFSET::T
     Y_OFFSET::T
@@ -52,6 +52,15 @@ struct cavity{T}
     VOLTAGE::T
     PHI0::T
     RF_FREQUENCY::Float64
+end
+
+struct rf_time{T}   # particle_rf_time
+    z::T
+    pz::T
+    p0c::T
+    mc2::Float64
+    beta::T
+    time::T
 end
 
 
@@ -81,7 +90,7 @@ struct int_unset{T}
     py_lab::T
 end
 
-struct int_z_correction{T} # z energy correction
+struct int_z_correction{T} # z energy_correction
     beta::T
     beta0::T
     e_tot::T
@@ -89,7 +98,7 @@ struct int_z_correction{T} # z energy correction
     dz::T
 end
 
-struct int_quad{T} 
+struct int_quad{T} # track_a_quadrupole
     x_ele::T
     px_ele::T
     y_ele::T
@@ -112,7 +121,7 @@ struct int_quad{T}
     dz::T
 end
 
-struct int_sextupole{T}
+struct int_sextupole{T} # track_a_sextupole
     x_ele::T
     px_ele::T
     y_ele::T
@@ -125,23 +134,15 @@ struct int_sextupole{T}
     dz::T
 end
 
-struct rf_time{T}
-    z::T
-    pz::T
-    p0c::T
-    mc2::Float64
-    beta::T
-    time::T
-end
-
-struct energy_kick{T}
+struct int_energy_kick{T}  # apply_energy_kick
     beta::T
     E::T
     E_old::T
     pc::T
 end
 
-struct int_rf{T}
+
+struct int_rf{T}  # track_a_rf_cavity
     x_ele::T
     px_ele::T
     S::T
@@ -162,7 +163,7 @@ struct int_rf{T}
     Pl::T
 end
 
-struct int_crab{T}
+struct int_crab{T}  # track_a_crab_cavity
     x_ele::T
     px_ele::T
     S::T
@@ -181,11 +182,12 @@ struct int_crab{T}
 end
 
 
-"""adapting structs to bitstype"""
+"""adapting struct elements to bitstype; 
+required type for implementation on the GPU"""
 Adapt.@adapt_structure particle; Adapt.@adapt_structure drift; Adapt.@adapt_structure offset_and_tilt;
 Adapt.@adapt_structure z_correction; Adapt.@adapt_structure quad_calc_input; Adapt.@adapt_structure quad_and_sextupole;
 Adapt.@adapt_structure int_drift; Adapt.@adapt_structure int_set; Adapt.@adapt_structure int_unset;
 Adapt.@adapt_structure int_z_correction; Adapt.@adapt_structure int_quad; Adapt.@adapt_structure int_sextupole;
-Adapt.@adapt_structure rf_time; Adapt.@adapt_structure energy_kick; Adapt.@adapt_structure cavity;
+Adapt.@adapt_structure rf_time; Adapt.@adapt_structure int_energy_kick; Adapt.@adapt_structure cavity;
 Adapt.@adapt_structure int_rf; Adapt.@adapt_structure int_crab;
 

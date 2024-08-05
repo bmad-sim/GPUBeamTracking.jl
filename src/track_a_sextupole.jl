@@ -99,4 +99,3 @@ function track_a_sextupole!(p_in, sextupole, int)
     s = p_in.s + l
     return nothing
 end
-
